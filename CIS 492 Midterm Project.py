@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[1]:
+# In[2]:
 
 
 #Task 1 (20 points): Get familiar with the dataset. You can do some statistic analysis (table or plotting) for
@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 import os
 
 
-# In[2]:
+# In[3]:
 
 
 def process_file(filename, anomaly=1):
@@ -28,78 +28,78 @@ def process_file(filename, anomaly=1):
     return df
 
 
-# In[3]:
+# In[4]:
 
 
 train = pd.read_csv("normal/training-data.csv")
 
 
-# In[4]:
+# In[354]:
 
 
 data = []
 
-for file in os.listdir("anomaly/VALID_ANOMALY"):
-   df = process_file(os.path.join("anomaly/VALID_ANOMALY", file), 1)
-   data.append(df)
+#for file in os.listdir("anomaly/VALID_ANOMALY"):
+   #df = process_file(os.path.join("anomaly/VALID_ANOMALY", file), 1)
+   #data.append(df)
 
 
-# In[5]:
+# In[355]:
 
 
-#for file in os.listdir("anomaly/TEST_ANOMALY"):
-    #df = process_file(os.path.join("anomaly/TEST_ANOMALY", file), 1)
-    #data.append(df)
+for file in os.listdir("anomaly/TEST_ANOMALY"):
+    df = process_file(os.path.join("anomaly/TEST_ANOMALY", file), 1)
+    data.append(df)
 
 
-# In[6]:
+# In[356]:
 
 
-#for file in os.listdir("normal/TEST_NORMAL"):
-     #df = process_file(os.path.join("normal/TEST_NORMAL", file), 0)
-     #data.append(df)
+for file in os.listdir("normal/TEST_NORMAL"):
+     df = process_file(os.path.join("normal/TEST_NORMAL", file), 0)
+     data.append(df)
 
 
-# In[7]:
+# In[357]:
 
 
-for file in os.listdir("normal/VALID_NORMAL"):
-   df = process_file(os.path.join("normal/VALID_NORMAL", file), 0)
-   data.append(df)
+#for file in os.listdir("normal/VALID_NORMAL"):
+   #df = process_file(os.path.join("normal/VALID_NORMAL", file), 0)
+   #data.append(df)
 
 
-# In[8]:
+# In[358]:
 
 
 #df = process_file("normal/training-data.csv", 0)
 #data.append(df)
 
 
-# In[9]:
+# In[359]:
 
 
 df = pd.concat(data)
 
 
-# In[10]:
+# In[360]:
 
 
 df.groupby(["id", "anomaly"], as_index=False)["lq_d"].agg(["min", "max"]).groupby("anomaly").agg(["mean", "std"])
 
 
-# In[11]:
+# In[361]:
 
 
 plt.scatter(df["cmp_b_s"], df["cmp_a_s"], c=df["anomaly"].replace({1:"red", 0:"blue"}))
 
 
-# In[12]:
+# In[362]:
 
 
 plt.scatter(df["cmp_b_d"], df["cmp_a_d"], c=df["anomaly"].replace({1:"red", 0:"blue"}))
 
 
-# In[13]:
+# In[363]:
 
 
 #Task 2 (30 points): Using independent Gaussian analysis for anomaly detection. The threshold can be
@@ -107,7 +107,7 @@ plt.scatter(df["cmp_b_d"], df["cmp_a_d"], c=df["anomaly"].replace({1:"red", 0:"b
 #Negative, Precision, Recall, and F1 score
 
 
-# In[14]:
+# In[364]:
 
 
 #pick features
@@ -115,7 +115,7 @@ train = pd.read_csv("train/training-data.csv")
 features = ["f1_d", "f2_d", "pr_d", "lq_d", "cmp_a_d","cmp_b_d", "cmp_c_d"]
 
 
-# In[15]:
+# In[365]:
 
 
 #compute the mean and standard deviation for the features
@@ -124,7 +124,7 @@ model = model_data.agg(["mean", "std"])
 model
 
 
-# In[16]:
+# In[366]:
 
 
 def p(x, model):
@@ -141,7 +141,7 @@ def p(x, model):
 
 
 
-# In[17]:
+# In[367]:
 
 
 validation = pd.read_csv("valid/0.csv")
@@ -151,20 +151,20 @@ p(x.iloc[0], model)
 p(x, model).hist(bins=40)
 
 
-# In[18]:
+# In[368]:
 
 
 results = p(df, model)
 
 
-# In[19]:
+# In[369]:
 
 
 anomaly_probability_threshold = 0.000034
 df["anomaly_predicted"] = (results < anomaly_probability_threshold).astype(int)
 
 
-# In[20]:
+# In[370]:
 
 
 y = pd.read_csv("submission.txt", header=None, sep=" ")
@@ -173,19 +173,19 @@ y = pd.read_csv("submission.txt", header=None, sep=" ")
 y = df.groupby("id")["anomaly"].max()
 
 
-# In[21]:
+# In[371]:
 
 
 (df.groupby("id")["anomaly_predicted"].mean()).hist(bins=20)
 
 
-# In[22]:
+# In[372]:
 
 
 (df.groupby("id")["anomaly_predicted"].mean())
 
 
-# In[23]:
+# In[373]:
 
 
 pct_process_threshold = 0.120
@@ -193,19 +193,19 @@ pred = (df.groupby("id")["anomaly_predicted"].mean() > pct_process_threshold).as
 (pred.sort_index() == y).mean()
 
 
-# In[24]:
+# In[374]:
 
 
 y.mean(), pred.mean()
 
 
-# In[25]:
+# In[375]:
 
 
 pd.concat([pred, y], axis=1)
 
 
-# In[26]:
+# In[376]:
 
 
 true_positives = 0
@@ -228,7 +228,7 @@ recall = true_positives / (true_positives + false_negatives)
 f_1_score = (2 * (precision * recall)) / (precision + recall)
 
 
-# In[27]:
+# In[377]:
 
 
 print("true positives: ", true_positives)
@@ -240,7 +240,7 @@ print("recall: ", recall)
 print("f1 score: ", f_1_score)
 
 
-# In[28]:
+# In[378]:
 
 
 #Task 3 (45 points): Using Multi-variate Gaussian analysis for anomaly detection. The threshold can be
@@ -248,7 +248,7 @@ print("f1 score: ", f_1_score)
 #Negative, Precision, Recall, and F1 score.
 
 
-# In[73]:
+# In[379]:
 
 
 def m_p(x, model):
@@ -277,11 +277,12 @@ def m_p(x, model):
 
     sigma /= len(model)
     
+    return sigma, mu
+    
     a = np.array(x)
     arr = []
     for i in range(0, len(x)):
         b = np.array([x.iloc[i]]).T
-        #prob = np.array((1 / (((2 *np.pi)**(d/2)) * (np.linalg.det(sigma)**(0.5)))) * np.exp(-0.5 * ((b-mu).T @ np.linalg.inv(sigma) @ (b-mu))))
         prob = np.array( (1 / ( ((2 * np.pi)**(d/2)) * (np.linalg.det(sigma)**(0.5)))) * np.exp(-0.5 * ( (b-mu).T @ np.linalg.inv(sigma) @ (b-mu))))
         arr.append(prob[0][0])
         
@@ -292,53 +293,115 @@ def m_p(x, model):
         
 
 
-# In[140]:
+# In[380]:
 
 
 df = pd.concat(data)
 
 
-# In[75]:
+# In[381]:
 
 
-model = train[features]
+features = ["f1_a", "f1_s", "f1_c", "f2_a", "f2_s", "f2_c", "pr_s", "prd_a", "prd_c", "prd_s"]
 
 
-# In[76]:
+# In[382]:
 
 
-results = m_p(df[features], model)
+model_data = train[features]
 
 
-# In[82]:
+# In[383]:
 
 
-#print(results.grouby("id")["Prob"])
-anomaly_probability_threshold = 0.000002
-
-df["anomaly_predicted"] = (results < anomaly_probability_threshold).astype(int)
+#results = m_p(df[features], model)
 
 
-# In[83]:
+# In[384]:
+
+
+model = model_data.agg(["mean", "std"])
+model
+
+
+# In[385]:
+
+
+def normalized(data, model):
+    normalized = data
+    for i in range(0, len(data)):
+        for feature in model.columns:
+            a = (float(normalized.iloc[i][feature]) - float(model[feature]["mean"])) / ( model[feature]["std"])
+            normalized.loc[i, feature] = abs(a)
+            
+    return normalized
+        
+
+
+# In[386]:
+
+
+#train_n = normalized(train[features], model)
+#train_n
+
+
+# In[387]:
+
+
+sigma = np.cov(train[features].values.T)
+
+
+# In[388]:
+
+
+mu = train[features].mean().values
+
+
+# In[389]:
+
+
+def m_p_2(x, mu, sigma):
+    d = sigma.shape[0]
+    x_c = x-mu
+    return (1 / ( ((2 * np.pi)**(d/2)) * (np.linalg.det(sigma)**(0.5)))) * np.exp(-0.5 * (x_c @ np.linalg.inv(sigma) @ x_c.T))
+
+
+# In[390]:
+
+
+p = np.apply_along_axis(m_p_2, axis=1, arr=df[features].values, mu=mu, sigma=sigma)
+
+
+# In[391]:
+
+
+results = pd.DataFrame(p)
+results.hist(bins=50)
+anomaly_probability_threshold = 0.1 * (10**-29)
+
+df["anomaly_predicted"] = (results > anomaly_probability_threshold).astype(int)
+
+
+# In[398]:
 
 
 y = pd.read_csv("submission.txt", header=None, sep=" ")
-#y.columns = ["id", "anomaly"]
-# y = y.set_index("id")["anomaly"]
-y = df.groupby("id")["anomaly"].max()
+y.columns = ["id", "anomaly"]
+y = y.set_index("id")["anomaly"]
+#y = df.groupby("id")["anomaly"].max()
 
 
-# In[84]:
+# In[399]:
 
 
 (df.groupby("id")["anomaly_predicted"].mean()).hist(bins=60)
 
 
-# In[134]:
+# In[400]:
 
 
-pct_process_threshold_lower = 0.18727
-pct_process_threshold_upper = 1
+pct_process_threshold_lower = 0
+pct_process_threshold_upper = 0.34996
 subset_df = df.groupby("id")["anomaly_predicted"].mean()
 
 for i in range(0, len(subset_df)):
@@ -347,19 +410,19 @@ for i in range(0, len(subset_df)):
 (pred.sort_index() == y).mean()
 
 
-# In[135]:
+# In[401]:
 
 
 y.mean(), pred.mean()
 
 
-# In[136]:
+# In[402]:
 
 
 pd.concat([pred, y], axis=1)
 
 
-# In[137]:
+# In[403]:
 
 
 true_positives = 0
@@ -382,7 +445,7 @@ recall = true_positives / (true_positives + false_negatives)
 f_1_score = (2 * (precision * recall)) / (precision + recall)
 
 
-# In[138]:
+# In[404]:
 
 
 print("true positives: ", true_positives)
@@ -392,11 +455,5 @@ print("true negatives: ", true_negatives)
 print("precision: ", precision)
 print("recall: ", recall)
 print("f1 score: ", f_1_score)
-
-
-
-# In[ ]:
-
-
 
 
