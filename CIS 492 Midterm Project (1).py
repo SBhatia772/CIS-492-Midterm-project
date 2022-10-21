@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[2]:
+# In[1]:
 
 
 #Task 1 (20 points): Get familiar with the dataset. You can do some statistic analysis (table or plotting) for
@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 import os
 
 
-# In[3]:
+# In[2]:
 
 
 def process_file(filename, anomaly=1):
@@ -28,13 +28,13 @@ def process_file(filename, anomaly=1):
     return df
 
 
-# In[4]:
+# In[3]:
 
 
 train = pd.read_csv("normal/training-data.csv")
 
 
-# In[354]:
+# In[4]:
 
 
 data = []
@@ -44,7 +44,7 @@ data = []
    #data.append(df)
 
 
-# In[355]:
+# In[5]:
 
 
 for file in os.listdir("anomaly/TEST_ANOMALY"):
@@ -52,7 +52,7 @@ for file in os.listdir("anomaly/TEST_ANOMALY"):
     data.append(df)
 
 
-# In[356]:
+# In[6]:
 
 
 for file in os.listdir("normal/TEST_NORMAL"):
@@ -60,7 +60,7 @@ for file in os.listdir("normal/TEST_NORMAL"):
      data.append(df)
 
 
-# In[357]:
+# In[7]:
 
 
 #for file in os.listdir("normal/VALID_NORMAL"):
@@ -68,38 +68,38 @@ for file in os.listdir("normal/TEST_NORMAL"):
    #data.append(df)
 
 
-# In[358]:
+# In[8]:
 
 
 #df = process_file("normal/training-data.csv", 0)
 #data.append(df)
 
 
-# In[359]:
+# In[9]:
 
 
 df = pd.concat(data)
 
 
-# In[360]:
+# In[10]:
 
 
 df.groupby(["id", "anomaly"], as_index=False)["lq_d"].agg(["min", "max"]).groupby("anomaly").agg(["mean", "std"])
 
 
-# In[361]:
+# In[12]:
 
 
 plt.scatter(df["cmp_b_s"], df["cmp_a_s"], c=df["anomaly"].replace({1:"red", 0:"blue"}))
 
 
-# In[362]:
+# In[14]:
 
 
 plt.scatter(df["cmp_b_d"], df["cmp_a_d"], c=df["anomaly"].replace({1:"red", 0:"blue"}))
 
 
-# In[363]:
+# In[15]:
 
 
 #Task 2 (30 points): Using independent Gaussian analysis for anomaly detection. The threshold can be
@@ -107,7 +107,7 @@ plt.scatter(df["cmp_b_d"], df["cmp_a_d"], c=df["anomaly"].replace({1:"red", 0:"b
 #Negative, Precision, Recall, and F1 score
 
 
-# In[364]:
+# In[16]:
 
 
 #pick features
@@ -115,7 +115,7 @@ train = pd.read_csv("train/training-data.csv")
 features = ["f1_d", "f2_d", "pr_d", "lq_d", "cmp_a_d","cmp_b_d", "cmp_c_d"]
 
 
-# In[365]:
+# In[19]:
 
 
 #compute the mean and standard deviation for the features
@@ -124,7 +124,7 @@ model = model_data.agg(["mean", "std"])
 model
 
 
-# In[366]:
+# In[20]:
 
 
 def p(x, model):
@@ -141,7 +141,7 @@ def p(x, model):
 
 
 
-# In[367]:
+# In[21]:
 
 
 validation = pd.read_csv("valid/0.csv")
@@ -151,20 +151,20 @@ p(x.iloc[0], model)
 p(x, model).hist(bins=40)
 
 
-# In[368]:
+# In[22]:
 
 
 results = p(df, model)
 
 
-# In[369]:
+# In[23]:
 
 
 anomaly_probability_threshold = 0.000034
 df["anomaly_predicted"] = (results < anomaly_probability_threshold).astype(int)
 
 
-# In[370]:
+# In[24]:
 
 
 y = pd.read_csv("submission.txt", header=None, sep=" ")
@@ -173,19 +173,19 @@ y = pd.read_csv("submission.txt", header=None, sep=" ")
 y = df.groupby("id")["anomaly"].max()
 
 
-# In[371]:
+# In[25]:
 
 
 (df.groupby("id")["anomaly_predicted"].mean()).hist(bins=20)
 
 
-# In[372]:
+# In[26]:
 
 
 (df.groupby("id")["anomaly_predicted"].mean())
 
 
-# In[373]:
+# In[27]:
 
 
 pct_process_threshold = 0.120
@@ -193,19 +193,31 @@ pred = (df.groupby("id")["anomaly_predicted"].mean() > pct_process_threshold).as
 (pred.sort_index() == y).mean()
 
 
-# In[374]:
+# In[28]:
 
 
 y.mean(), pred.mean()
 
 
-# In[375]:
+# In[60]:
 
 
 pd.concat([pred, y], axis=1)
 
 
-# In[376]:
+# In[143]:
+
+
+id_list = np.sort(df["id"].drop_duplicates().values, axis=None)
+
+
+# In[144]:
+
+
+np.savetxt('gaussian_output.txt', np.column_stack((id_list,pred.values)), fmt ="%i %i", delimiter = ' ')
+
+
+# In[145]:
 
 
 true_positives = 0
@@ -228,7 +240,7 @@ recall = true_positives / (true_positives + false_negatives)
 f_1_score = (2 * (precision * recall)) / (precision + recall)
 
 
-# In[377]:
+# In[146]:
 
 
 print("true positives: ", true_positives)
@@ -240,7 +252,7 @@ print("recall: ", recall)
 print("f1 score: ", f_1_score)
 
 
-# In[378]:
+# In[147]:
 
 
 #Task 3 (45 points): Using Multi-variate Gaussian analysis for anomaly detection. The threshold can be
@@ -248,7 +260,7 @@ print("f1 score: ", f_1_score)
 #Negative, Precision, Recall, and F1 score.
 
 
-# In[379]:
+# In[148]:
 
 
 def m_p(x, model):
@@ -293,38 +305,38 @@ def m_p(x, model):
         
 
 
-# In[380]:
+# In[149]:
 
 
 df = pd.concat(data)
 
 
-# In[381]:
+# In[150]:
 
 
 features = ["f1_a", "f1_s", "f1_c", "f2_a", "f2_s", "f2_c", "pr_s", "prd_a", "prd_c", "prd_s"]
 
 
-# In[382]:
+# In[151]:
 
 
 model_data = train[features]
 
 
-# In[383]:
+# In[152]:
 
 
 #results = m_p(df[features], model)
 
 
-# In[384]:
+# In[153]:
 
 
 model = model_data.agg(["mean", "std"])
 model
 
 
-# In[385]:
+# In[154]:
 
 
 def normalized(data, model):
@@ -338,26 +350,26 @@ def normalized(data, model):
         
 
 
-# In[386]:
+# In[155]:
 
 
 #train_n = normalized(train[features], model)
 #train_n
 
 
-# In[387]:
+# In[156]:
 
 
 sigma = np.cov(train[features].values.T)
 
 
-# In[388]:
+# In[157]:
 
 
 mu = train[features].mean().values
 
 
-# In[389]:
+# In[158]:
 
 
 def m_p_2(x, mu, sigma):
@@ -366,13 +378,13 @@ def m_p_2(x, mu, sigma):
     return (1 / ( ((2 * np.pi)**(d/2)) * (np.linalg.det(sigma)**(0.5)))) * np.exp(-0.5 * (x_c @ np.linalg.inv(sigma) @ x_c.T))
 
 
-# In[390]:
+# In[159]:
 
 
 p = np.apply_along_axis(m_p_2, axis=1, arr=df[features].values, mu=mu, sigma=sigma)
 
 
-# In[391]:
+# In[160]:
 
 
 results = pd.DataFrame(p)
@@ -382,7 +394,7 @@ anomaly_probability_threshold = 0.1 * (10**-29)
 df["anomaly_predicted"] = (results > anomaly_probability_threshold).astype(int)
 
 
-# In[398]:
+# In[161]:
 
 
 y = pd.read_csv("submission.txt", header=None, sep=" ")
@@ -391,38 +403,47 @@ y = y.set_index("id")["anomaly"]
 #y = df.groupby("id")["anomaly"].max()
 
 
-# In[399]:
+# In[162]:
 
 
 (df.groupby("id")["anomaly_predicted"].mean()).hist(bins=60)
 
 
-# In[400]:
+# In[163]:
 
 
-pct_process_threshold_lower = 0
-pct_process_threshold_upper = 0.34996
-subset_df = df.groupby("id")["anomaly_predicted"].mean()
+pct_process_threshold = 0.34996
 
-for i in range(0, len(subset_df)):
-    pred.iloc[i] = ((subset_df.iloc[i] > pct_process_threshold_lower) and (subset_df.iloc[i] < pct_process_threshold_upper)).astype(int)
+pred = (df.groupby("id")["anomaly_predicted"].mean() < pct_process_threshold).astype(int)
 #pred = ((df.groupby("id")["anomaly_predicted"].mean() > pct_process_threshold) or (df.groupby("id")["anomaly_predicted"].mean() < pct_process_threshold_lower)).astype(int)
 (pred.sort_index() == y).mean()
 
 
-# In[401]:
+# In[164]:
 
 
 y.mean(), pred.mean()
 
 
-# In[402]:
+# In[165]:
 
 
 pd.concat([pred, y], axis=1)
 
 
-# In[403]:
+# In[167]:
+
+
+id_list = np.sort(df["id"].drop_duplicates().values, axis=None)
+
+
+# In[168]:
+
+
+np.savetxt('multivariate_gaussian_output.txt', np.column_stack((id_list,pred.values)), fmt ="%i %i", delimiter = ' ')
+
+
+# In[171]:
 
 
 true_positives = 0
@@ -445,7 +466,7 @@ recall = true_positives / (true_positives + false_negatives)
 f_1_score = (2 * (precision * recall)) / (precision + recall)
 
 
-# In[404]:
+# In[172]:
 
 
 print("true positives: ", true_positives)
@@ -455,5 +476,11 @@ print("true negatives: ", true_negatives)
 print("precision: ", precision)
 print("recall: ", recall)
 print("f1 score: ", f_1_score)
+
+
+
+# In[ ]:
+
+
 
 
